@@ -47,7 +47,7 @@
       btn.setAttribute("aria-pressed", isLight ? "true" : "false");
       btn.setAttribute("aria-label", isLight ? "Ganti ke mode gelap" : "Ganti ke mode terang");
       if (icon) icon.className = isLight ? "bi bi-moon-stars" : "bi bi-sun";
-      if (label) label.textContent = isLight ? "Mode Gelap" : "Mode Terang";
+      if (label) label.textContent = isLight ? "Gelap" : "Terang";
     }
 
     syncThemeControls(document.documentElement.getAttribute("data-theme") || "dark");
@@ -68,12 +68,20 @@
       });
     }
 
+    function syncMenuButton(isOpen) {
+      if (!menuBtn) return;
+      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      menuBtn.setAttribute("aria-label", isOpen ? "Tutup menu navigasi" : "Buka menu navigasi");
+      var menuIcon = menuBtn.querySelector("[data-menu-icon]");
+      if (menuIcon) menuIcon.className = isOpen ? "bi bi-x-lg" : "bi bi-list";
+    }
+
     function closeDrawer(restoreFocus) {
       if (!drawer || !menuBtn) return;
       drawer.classList.remove("is-open");
       drawer.setAttribute("aria-hidden", "true");
       drawer.setAttribute("inert", "");
-      menuBtn.setAttribute("aria-expanded", "false");
+      syncMenuButton(false);
       if (restoreFocus) menuBtn.focus();
     }
 
@@ -87,7 +95,7 @@
           drawer.setAttribute("aria-hidden", "true");
           drawer.setAttribute("inert", "");
         }
-        menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        syncMenuButton(open);
       });
 
       document.addEventListener("keydown", function (e) {
