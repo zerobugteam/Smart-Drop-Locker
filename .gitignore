@@ -7,3 +7,4 @@ public/uploads/*
 firmware/esp32_cam/secrets.h
 *.log
 
+.neon

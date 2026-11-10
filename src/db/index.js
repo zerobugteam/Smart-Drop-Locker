@@ -2,6 +2,13 @@ const { Pool } = require("pg");
 
 let pool;
 
+function getSslOption(connectionString) {
+  const isLocal =
+    connectionString.includes("localhost") ||
+    connectionString.includes("127.0.0.1");
+  return isLocal ? false : { rejectUnauthorized: false };
+}
+
 function getPool() {
   if (!process.env.DATABASE_URL) {
     throw new Error(
@@ -10,14 +17,10 @@ function getPool() {
   }
 
   if (!globalThis.__smartDropLockerPool) {
-    const isLocal =
-      process.env.DATABASE_URL.includes("localhost") ||
-      process.env.DATABASE_URL.includes("127.0.0.1");
-
     globalThis.__smartDropLockerPool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 5,
-      ssl: isLocal ? false : { rejectUnauthorized: false },
+      ssl: getSslOption(process.env.DATABASE_URL),
     });
   }
 
@@ -31,6 +34,7 @@ async function query(text, params = []) {
 
 module.exports = {
   getPool,
+  getSslOption,
   query,
 };
 
