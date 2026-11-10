@@ -1,0 +1,21 @@
+{
+  "name": "smart-drop-locker",
+  "version": "1.0.0",
+  "description": "Sistem Loker Paket Pintar Berbasis IoT (ESP32-CAM) & Express + EJS untuk Vercel",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "check": "node --check api/index.js && node --check server.js && node --check src/app.js"
+  },
+  "dependencies": {
+    "@undecaf/zbar-wasm": "^0.11.0",
+    "@vercel/blob": "^0.27.0",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "multer": "^2.5.0",
+    "pg": "^8.13.1",
+    "sharp": "^0.33.5"
+  }
+}

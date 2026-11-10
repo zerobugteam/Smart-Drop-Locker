@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.local
+.vercel/
+public/uploads/*
+!public/uploads/.gitkeep
+firmware/esp32_cam/secrets.h
+*.log
+

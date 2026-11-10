@@ -1,0 +1,58 @@
+<%- include("../partials/header") %>
+<%- include("../partials/sidebar", { activePage }) %>
+
+<div class="card-glass p-4 mb-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <h3 class="mb-1">Detail &amp; Edit Resi</h3>
+      <div class="text-muted">Informasi detail data resi paket.</div>
+    </div>
+
+    <a class="btn btn-outline-light" href="/resi">
+      <i class="bi bi-arrow-left me-2"></i>Kembali
+    </a>
+  </div>
+</div>
+
+<% if (msg) { %>
+  <div class="alert alert-success"><%= msg %></div>
+<% } %>
+<% if (err) { %>
+  <div class="alert alert-danger"><%= err %></div>
+<% } %>
+
+<% if (data) { %>
+  <div class="card-glass p-4">
+    <form method="post" action="/resi/<%= data.id %>/edit" class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Nomor Resi</label>
+        <input class="form-control" name="nomor_resi" value="<%= data.nomor_resi %>" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Status</label>
+        <select class="form-select" name="status">
+          <option value="valid" <%= data.status === "valid" ? "selected" : "" %>>valid</option>
+          <option value="invalid" <%= data.status === "invalid" ? "selected" : "" %>>invalid</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Nama Paket</label>
+        <input class="form-control" name="nama_paket" value="<%= data.nama_paket || '' %>">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Dibuat</label>
+        <input class="form-control" value="<%= data.created_at %>" disabled>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-accent text-white px-4">
+          <i class="bi bi-save me-2"></i>Simpan Perubahan
+        </button>
+      </div>
+    </form>
+  </div>
+<% } else { %>
+  <div class="alert alert-danger">Data resi tidak ditemukan.</div>
+<% } %>
+
+<%- include("../partials/footer") %>
+

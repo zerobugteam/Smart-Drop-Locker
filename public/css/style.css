@@ -1,0 +1,210 @@
+:root {
+  --bg: #0b1220;
+  --panel: rgba(255, 255, 255, .06);
+  --panel2: rgba(255, 255, 255, .08);
+  --border: rgba(255, 255, 255, .12);
+  --text: rgba(255, 255, 255, .92);
+  --muted: rgba(255, 255, 255, .70);
+  --accent: #7c3aed;
+}
+
+body {
+  background: radial-gradient(1200px 700px at 10% 10%, rgba(124, 58, 237, .35), transparent 60%),
+              radial-gradient(900px 600px at 90% 20%, rgba(34, 197, 94, .22), transparent 55%),
+              var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 280px;
+  padding: 18px;
+  background: rgba(255, 255, 255, .04);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 991.98px) {
+  .app {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.brand-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(124, 58, 237, .9), rgba(34, 197, 94, .7));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.brand-title {
+  font-weight: 800;
+  letter-spacing: .3px;
+}
+
+.brand-sub {
+  color: var(--muted);
+  font-size: .86rem;
+  margin-top: -2px;
+}
+
+.nav-link {
+  color: var(--muted);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border: 1px solid transparent;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: var(--panel);
+  border-color: var(--border);
+}
+
+.nav-link.active {
+  color: var(--text);
+  background: linear-gradient(135deg, rgba(124, 58, 237, .22), rgba(34, 197, 94, .12));
+  border-color: rgba(124, 58, 237, .25);
+}
+
+.nav-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 10px 0;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+}
+
+.topbar-user {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  font-weight: 700;
+}
+
+.content {
+  padding: 0 22px 28px;
+}
+
+.card-glass {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, .25);
+}
+
+.badge-soft {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+}
+
+.form-control,
+.form-select {
+  background: rgba(255, 255, 255, .05) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 14px !important;
+}
+
+.form-select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, .45);
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, rgba(124, 58, 237, .95), rgba(34, 197, 94, .75));
+  border: none;
+  border-radius: 14px;
+}
+
+.table {
+  color: var(--text) !important;
+}
+
+.table thead th {
+  color: rgba(255, 255, 255, .90) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+.table td,
+.table th {
+  border-top-color: var(--border) !important;
+  color: rgba(255, 255, 255, .90) !important;
+}
+
+.text-muted {
+  color: rgba(255, 255, 255, .78) !important;
+}
+
+.table-hover tbody tr:hover td,
+.table-hover tbody tr:hover th {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+.table-dark {
+  --bs-table-color: rgba(255, 255, 255, .90);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: rgba(255, 255, 255, .12);
+  --bs-table-hover-color: #fff;
+  --bs-table-hover-bg: rgba(255, 255, 255, .06);
+}
+

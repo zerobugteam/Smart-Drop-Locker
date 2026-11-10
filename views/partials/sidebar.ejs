@@ -1,0 +1,55 @@
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-badge"><i class="bi bi-box-seam"></i></div>
+    <div>
+      <div class="brand-title">Smart Drop Locker</div>
+      <div class="brand-sub">Monitoring &amp; Auth Resi</div>
+    </div>
+  </div>
+
+  <nav class="nav flex-column mt-3">
+    <a class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>" href="/">
+      <i class="bi bi-speedometer2 me-2"></i>Dashboard
+    </a>
+
+    <a class="nav-link <%= activePage === 'resi' ? 'active' : '' %>" href="/resi">
+      <i class="bi bi-upc-scan me-2"></i>Data Resi
+    </a>
+
+    <a class="nav-link <%= activePage === 'log' ? 'active' : '' %>" href="/log">
+      <i class="bi bi-clock-history me-2"></i>Log Akses
+    </a>
+
+    <div class="nav-divider"></div>
+
+    <a class="nav-link <%= activePage === 'resi_add' ? 'active' : '' %>" href="/resi/add">
+      <i class="bi bi-plus-circle me-2"></i>Tambah Resi
+    </a>
+
+    <a class="nav-link <%= activePage === 'scan' ? 'active' : '' %>" href="/scan">
+      <i class="bi bi-cloud-arrow-up me-2"></i>Scan Foto Barcode
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="small text-muted">TA: Smart Drop Locker IoT</div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left"></div>
+
+    <div class="topbar-right">
+      <div class="topbar-user">
+        <div class="avatar">TA</div>
+        <div>
+          <div class="fw-semibold">Monitoring</div>
+          <div class="small text-muted">ESP32-CAM + Express</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="content">
+

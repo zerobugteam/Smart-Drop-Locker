@@ -1,0 +1,187 @@
+<%- include("partials/header") %>
+<%- include("partials/sidebar", { activePage }) %>
+
+<% if (manualMsg) { %>
+  <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+    <i class="bi bi-unlock-fill me-2"></i><%= manualMsg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card-glass p-4">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+          <h3 class="mb-1">Dashboard</h3>
+          <div class="text-muted">Ringkasan sistem monitoring paket &amp; autentikasi resi.</div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <a class="btn btn-accent px-3 py-2 text-white" href="/resi/add">
+            <i class="bi bi-plus-circle me-2"></i>Tambah Resi
+          </a>
+
+          <form action="/manual-open" method="post" class="m-0"
+                onsubmit="return confirm('Yakin ingin membuka pintu secara manual?')">
+            <button type="submit" class="btn btn-danger px-3 py-2">
+              <i class="bi bi-unlock me-1"></i> Buka Pintu
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-glass p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Total Resi Terdaftar</div>
+          <div class="fs-3 fw-bold"><%= stats.total_resi %></div>
+        </div>
+        <div class="badge badge-soft p-2">
+          <i class="bi bi-upc-scan fs-4"></i>
+        </div>
+      </div>
+      <div class="mt-2 small text-muted">
+        Valid: <%= stats.resi_valid %> &bull; Invalid: <%= stats.resi_invalid %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-glass p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Total Scan Hari Ini</div>
+          <div class="fs-3 fw-bold"><%= stats.log_today %></div>
+        </div>
+        <div class="badge badge-soft p-2">
+          <i class="bi bi-clock-history fs-4"></i>
+        </div>
+      </div>
+      <div class="mt-2 small text-muted">
+        Berhasil: <%= stats.log_ok %> &bull; Gagal: <%= stats.log_fail %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-glass p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Status Server &amp; Pintu</div>
+          <div class="fs-4 fw-bold">
+            <i class="bi bi-check-circle-fill me-2" style="color:#22c55e"></i>Online
+          </div>
+        </div>
+        <div class="badge badge-soft p-2">
+          <i class="bi bi-hdd-network fs-4"></i>
+        </div>
+      </div>
+      <div class="mt-2 small text-muted">
+        Mode: <%= isVercel ? "Vercel Serverless" : "Local Node.js" %> &bull; Pintu: <%= doorStatus %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card-glass p-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold">Log Terbaru</div>
+        <a class="text-decoration-none" href="/log">
+          Lihat semua <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Nomor Resi</th>
+              <th>Status</th>
+              <th>Pesan</th>
+              <th>Foto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (latest.length > 0) { %>
+              <% latest.forEach((x) => { %>
+                <tr>
+                  <td class="text-muted"><%= x.created_at %></td>
+                  <td class="fw-semibold"><%= x.nomor_resi || "-" %></td>
+                  <td>
+                    <% if (x.status === "berhasil") { %>
+                      <span class="badge text-bg-success">Berhasil</span>
+                    <% } else { %>
+                      <span class="badge text-bg-danger">Gagal</span>
+                    <% } %>
+                  </td>
+                  <td class="text-muted"><%= x.pesan || "-" %></td>
+                  <td>
+                    <% if (x.foto_path) { %>
+                      <a href="#"
+                         data-foto-modal="1"
+                         data-src="<%= x.foto_path %>"
+                         data-caption="<%= (x.nomor_resi || '-') + ' • ' + x.created_at %>">
+                        <img
+                          src="<%= x.foto_path %>"
+                          alt="foto"
+                          style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.2);cursor:pointer;">
+                      </a>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="text-muted">Belum ada log.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="fotoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title">Bukti Foto</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="fotoModalImg" src="" alt="foto" style="max-width:100%;height:auto;border-radius:12px;">
+        <div class="mt-2 text-muted small" id="fotoModalCaption"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("click", function (e) {
+  const a = e.target.closest("[data-foto-modal='1']");
+  if (!a) return;
+  e.preventDefault();
+
+  document.getElementById("fotoModalImg").src = a.getAttribute("data-src");
+  document.getElementById("fotoModalCaption").textContent = a.getAttribute("data-caption") || "";
+
+  const modal = new bootstrap.Modal(document.getElementById("fotoModal"));
+  modal.show();
+});
+
+document.getElementById("fotoModal").addEventListener("hidden.bs.modal", function () {
+  document.getElementById("fotoModalImg").src = "";
+  document.getElementById("fotoModalCaption").textContent = "";
+});
+</script>
+
+<%- include("partials/footer") %>
+

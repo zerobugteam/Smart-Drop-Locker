@@ -1,0 +1,26 @@
+<%- include("partials/header") %>
+<%- include("partials/sidebar", { activePage }) %>
+
+<div class="card-glass p-4">
+  <h3 class="mb-1">Scan Foto Barcode</h3>
+  <div class="text-muted mb-3">Unggah foto barcode paket untuk pengujian validasi resi ke database.</div>
+
+  <% if (err) { %>
+    <div class="alert alert-danger"><%= err %></div>
+  <% } %>
+
+  <form method="post" action="/scan" enctype="multipart/form-data" class="row g-3">
+    <div class="col-12">
+      <label class="form-label">Foto Barcode (JPG / PNG)</label>
+      <input class="form-control" type="file" name="foto" accept="image/jpeg,image/png" required>
+    </div>
+    <div class="col-12 d-grid">
+      <button type="submit" class="btn btn-accent text-white py-2">
+        <i class="bi bi-upc-scan me-2"></i>Proses &amp; Validasi Barcode
+      </button>
+    </div>
+  </form>
+</div>
+
+<%- include("partials/footer") %>
+
