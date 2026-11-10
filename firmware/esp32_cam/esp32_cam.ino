@@ -4,22 +4,17 @@
 #include <HTTPClient.h>
 #include "secrets.h"
 
-// =======================
-// RELAY + LED
-// =======================
 #define RELAY_PIN 13
 #define LED_MERAH 12
 #define LED_HIJAU 14
+// GPIO 15 aman dipakai saat SD card tidak dimount; hubungkan tombol/sensor ke GND (aktif LOW).
+#define TRIGGER_PIN 15
 
-// =======================
-// AI THINKER CAMERA PIN
-// =======================
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
 #define XCLK_GPIO_NUM      0
 #define SIOD_GPIO_NUM     26
 #define SIOC_GPIO_NUM     27
-
 #define Y9_GPIO_NUM       35
 #define Y8_GPIO_NUM       34
 #define Y7_GPIO_NUM       39
@@ -32,7 +27,20 @@
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
+const unsigned long MANUAL_POLL_INTERVAL_MS = 3000;
+const unsigned long WIFI_RECONNECT_INTERVAL_MS = 10000;
+const unsigned long SCAN_COOLDOWN_MS = 3000;
+const unsigned long DEBOUNCE_MS = 50;
+const bool SCAN_ON_BOOT = true;
+
 unsigned long lastManualPoll = 0;
+unsigned long lastWiFiRetry = 0;
+unsigned long lastScanAt = 0;
+
+bool lastRawTrigger = HIGH;
+bool stableTrigger = HIGH;
+unsigned long lastDebounceAt = 0;
+bool cameraReady = false;
 
 bool initCamera() {
   camera_config_t config;
@@ -61,7 +69,7 @@ bool initCamera() {
 
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_VGA; // Resolusi lebih tajam untuk scan barcode
+  config.frame_size = FRAMESIZE_VGA;
   config.jpeg_quality = 12;
   config.fb_count = 1;
 
@@ -75,7 +83,9 @@ bool initCamera() {
 }
 
 bool connectWiFi() {
-  Serial.println("CONNECT WIFI");
+  Serial.println("Menghubungkan WiFi...");
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   int retry = 0;
@@ -87,31 +97,51 @@ bool connectWiFi() {
   Serial.println();
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("WiFi Connected");
+    Serial.print("WiFi terhubung, IP: ");
     Serial.println(WiFi.localIP());
     return true;
   }
 
-  Serial.println("WiFi gagal");
+  Serial.println("WiFi gagal terhubung");
   return false;
+}
+
+void ensureWiFiConnected() {
+  if (WiFi.status() == WL_CONNECTED) return;
+
+  unsigned long now = millis();
+  if (now - lastWiFiRetry < WIFI_RECONNECT_INTERVAL_MS) return;
+  lastWiFiRetry = now;
+
+  Serial.println("WiFi terputus, mencoba reconnect...");
+  WiFi.disconnect();
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
 }
 
 void openDoorCycle() {
   digitalWrite(LED_HIJAU, HIGH);
   digitalWrite(LED_MERAH, LOW);
-  digitalWrite(RELAY_PIN, LOW); // Relay aktif LOW -> solenoid terbuka
+  digitalWrite(RELAY_PIN, LOW); // Relay aktif LOW membuka solenoid
   delay(5000);
-  digitalWrite(RELAY_PIN, HIGH); // Kunci kembali
+  digitalWrite(RELAY_PIN, HIGH);
   digitalWrite(LED_HIJAU, LOW);
 }
 
+void signalRejected() {
+  digitalWrite(RELAY_PIN, HIGH);
+  digitalWrite(LED_MERAH, HIGH);
+  delay(3000);
+  digitalWrite(LED_MERAH, LOW);
+}
+
 String uploadPhoto(camera_fb_t *fb) {
-  Serial.println("UPLOAD FOTO KE VERCEL");
+  Serial.println("Upload foto ke server...");
 
   WiFiClientSecure client;
-  client.setInsecure(); // Untuk prototipe/TA; untuk produksi gunakan Root CA
+  client.setInsecure(); // Untuk prototipe; ganti dengan Root CA untuk produksi
 
   HTTPClient http;
+  http.setTimeout(15000);
   String url = String(BASE_URL) + "/api/upload-cam";
   if (!http.begin(client, url)) {
     Serial.println("HTTP begin gagal");
@@ -154,6 +184,7 @@ String apiGet(const String &path) {
   client.setInsecure();
 
   HTTPClient http;
+  http.setTimeout(8000);
   if (!http.begin(client, String(BASE_URL) + path)) return "";
   http.addHeader("x-api-key", ESP32_API_KEY);
 
@@ -168,10 +199,74 @@ void apiPostEmpty(const String &path) {
   client.setInsecure();
 
   HTTPClient http;
+  http.setTimeout(8000);
   if (!http.begin(client, String(BASE_URL) + path)) return;
   http.addHeader("x-api-key", ESP32_API_KEY);
   http.POST("");
   http.end();
+}
+
+void captureAndVerify() {
+  if (!cameraReady) {
+    Serial.println("Kamera belum siap");
+    return;
+  }
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi belum terhubung, scan dibatalkan");
+    signalRejected();
+    return;
+  }
+
+  // Buang 1 frame lama di buffer DMA agar foto selalu kondisi terbaru
+  camera_fb_t *stale = esp_camera_fb_get();
+  if (stale) {
+    esp_camera_fb_return(stale);
+  }
+
+  camera_fb_t *fb = esp_camera_fb_get();
+  if (!fb) {
+    Serial.println("Capture gagal");
+    signalRejected();
+    return;
+  }
+
+  String response = uploadPhoto(fb);
+  esp_camera_fb_return(fb);
+  lastScanAt = millis();
+
+  if (response.indexOf("\"open_lock\":true") >= 0) {
+    Serial.println("RESI VALID");
+    openDoorCycle();
+  } else {
+    Serial.println("RESI TIDAK VALID / GAGAL");
+    signalRejected();
+  }
+}
+
+bool checkHardwareTrigger() {
+  bool raw = digitalRead(TRIGGER_PIN);
+  unsigned long now = millis();
+
+  if (raw != lastRawTrigger) {
+    lastDebounceAt = now;
+    lastRawTrigger = raw;
+  }
+
+  if (now - lastDebounceAt >= DEBOUNCE_MS && raw != stableTrigger) {
+    stableTrigger = raw;
+    if (stableTrigger == LOW && now - lastScanAt >= SCAN_COOLDOWN_MS) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool checkSerialTrigger() {
+  if (!Serial.available()) return false;
+  String cmd = Serial.readStringUntil('\n');
+  cmd.trim();
+  cmd.toUpperCase();
+  return cmd == "SCAN" && (millis() - lastScanAt >= SCAN_COOLDOWN_MS);
 }
 
 void setup() {
@@ -181,38 +276,28 @@ void setup() {
   pinMode(RELAY_PIN, OUTPUT);
   pinMode(LED_MERAH, OUTPUT);
   pinMode(LED_HIJAU, OUTPUT);
+  pinMode(TRIGGER_PIN, INPUT_PULLUP);
 
   digitalWrite(RELAY_PIN, HIGH);
   digitalWrite(LED_MERAH, LOW);
   digitalWrite(LED_HIJAU, LOW);
 
-  if (!initCamera()) return;
-  if (!connectWiFi()) return;
+  cameraReady = initCamera();
+  connectWiFi();
 
-  camera_fb_t *fb = esp_camera_fb_get();
-  if (!fb) {
-    Serial.println("Capture gagal");
-    return;
-  }
-
-  String response = uploadPhoto(fb);
-  esp_camera_fb_return(fb);
-
-  if (response.indexOf("\"open_lock\":true") >= 0) {
-    Serial.println("RESI VALID");
-    openDoorCycle();
-  } else {
-    Serial.println("RESI TIDAK VALID");
-    digitalWrite(LED_MERAH, HIGH);
-    delay(3000);
-    digitalWrite(LED_MERAH, LOW);
-    digitalWrite(RELAY_PIN, HIGH);
+  if (SCAN_ON_BOOT && cameraReady && WiFi.status() == WL_CONNECTED) {
+    captureAndVerify();
   }
 }
 
 void loop() {
-  // Polling perintah buka pintu manual dari dashboard setiap 3 detik
-  if (WiFi.status() == WL_CONNECTED && millis() - lastManualPoll >= 3000) {
+  ensureWiFiConnected();
+
+  if (checkHardwareTrigger() || checkSerialTrigger()) {
+    captureAndVerify();
+  }
+
+  if (WiFi.status() == WL_CONNECTED && millis() - lastManualPoll >= MANUAL_POLL_INTERVAL_MS) {
     lastManualPoll = millis();
     String doorStatus = apiGet("/api/cek-manual");
     doorStatus.trim();
@@ -223,4 +308,3 @@ void loop() {
     }
   }
 }
-

@@ -5,16 +5,17 @@
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0f1115;
-  --surface: #161920;
-  --surface-raised: #1d212b;
-  --border: #2e3440;
-  --border-strong: #6e788c;
-  --text: #f3f4f6;
-  --text-muted: #a8b0be;
-  --accent: #e5a93b;
-  --accent-hover: #ebb652;
-  --accent-text: #14171c;
+  --bg: #11100d;
+  --surface: #181612;
+  --surface-raised: #221f19;
+  --border: #332f28;
+  --border-strong: #756e63;
+  --text: #f5f3ee;
+  --text-muted: #b5aea2;
+  --accent: #d89a2a;
+  --accent-hover: #e2aa43;
+  --accent-ink: #d89a2a;
+  --accent-text: #11100d;
   --ok: #4ade80;
   --ok-bg: #14261c;
   --ok-border: #255c39;
@@ -29,16 +30,17 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f3f4f1;
+  --bg: #f7f4ee;
   --surface: #ffffff;
-  --surface-raised: #eaece6;
-  --border: #d2d6ce;
-  --border-strong: #78808c;
-  --text: #14171c;
-  --text-muted: #4e5663;
-  --accent: #b45309;
-  --accent-hover: #9a4507;
-  --accent-text: #ffffff;
+  --surface-raised: #ede8df;
+  --border: #d9d2c5;
+  --border-strong: #7d766b;
+  --text: #14120e;
+  --text-muted: #575148;
+  --accent: #d89a2a;
+  --accent-hover: #c68b22;
+  --accent-ink: #8a5e0f;
+  --accent-text: #14120e;
   --ok: #15803d;
   --ok-bg: #ecfdf3;
   --ok-border: #86efac;
@@ -90,7 +92,7 @@ input[type="reset"] {
 
 /* Keyboard focus ring (R-32) */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-ink);
   outline-offset: 2px;
 }
 
@@ -147,16 +149,22 @@ input[type="reset"] {
 }
 
 .brand-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-control);
-  border: 1px solid var(--border-strong);
-  background-color: var(--surface-raised);
-  color: var(--accent);
-  display: inline-grid;
-  place-items: center;
-  font-size: 1.1rem;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.brand-mark img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 .brand-text {
@@ -641,7 +649,7 @@ input[type="reset"] {
 }
 
 .inline-link {
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 600;
   text-decoration: none;
 }
