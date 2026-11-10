@@ -4,7 +4,7 @@
 <div class="page-header">
   <div>
     <h1 class="page-title">Kontrol Loker &amp; Aktivitas</h1>
-    <p class="page-subtitle">Pantau status pintu loker, data resi valid, dan hasil pembacaan ESP32-CAM.</p>
+    <p class="page-subtitle">Pantau status pintu loker, data resi valid, dan hasil pemindaian kamera loker.</p>
   </div>
   <a class="btn-console btn-console-primary" href="/resi/add">
     <i class="bi bi-plus-lg" aria-hidden="true"></i>
@@ -30,7 +30,7 @@
       <div>
         <h2 class="panel-heading" id="door-control-heading">Status Pintu Loker</h2>
         <p class="muted-text mb-0 small mt-1">
-          Mode server: <strong><%= isVercel ? "Vercel Serverless" : "Local Node.js" %></strong>
+          Kondisi layanan: <strong>Aktif</strong>
         </p>
       </div>
       <% if (doorStatus === "BUKA") { %>
@@ -48,14 +48,14 @@
 
     <div class="door-state-row">
       <div>
-        <div class="door-state-label">Status Solenoid Saat Ini</div>
+        <div class="door-state-label">Status Kunci Pintu</div>
         <div class="door-state-value <%= doorStatus === 'BUKA' ? 'is-open' : 'is-closed' %>">
           <i class="bi <%= doorStatus === 'BUKA' ? 'bi-unlock-fill' : 'bi-lock-fill' %>" aria-hidden="true"></i>
           <span><%= doorStatus === "BUKA" ? "TERBUKA" : "TERKUNCI" %></span>
         </div>
       </div>
       <div class="muted-text small">
-        <%= doorStatus === "BUKA" ? "Menunggu reset dari ESP32-CAM" : "Menunggu resi valid atau perintah manual" %>
+        <%= doorStatus === "BUKA" ? "Pintu sedang dibuka, akan mengunci otomatis" : "Menunggu resi valid atau perintah manual" %>
       </div>
     </div>
 
@@ -167,7 +167,7 @@
   <% } else { %>
     <div class="empty-state">
       <div class="empty-state-title">Belum ada aktivitas scan</div>
-      <p class="mb-3 small">Log akan tercatat otomatis saat ESP32-CAM mengirim foto atau saat kamu menguji barcode lewat Scan Manual.</p>
+      <p class="mb-3 small">Log akan tercatat otomatis saat kamera loker memindai paket atau saat kamu menguji barcode lewat Scan Manual.</p>
       <a class="btn-console btn-console-secondary btn-console-sm" href="/scan">Uji Scan Foto Barcode</a>
     </div>
   <% } %>
@@ -183,7 +183,7 @@
       </div>
       <div class="modal-body">
         <p class="mb-0">
-          Perintah <strong>BUKA</strong> akan dikirim ke database kontrol pintu. ESP32-CAM akan membuka solenoid selama sekitar 5 detik pada polling berikutnya.
+          Kunci pintu loker akan dibuka secara manual selama sekitar 5 detik, lalu terkunci kembali secara otomatis.
         </p>
       </div>
       <div class="modal-footer">
