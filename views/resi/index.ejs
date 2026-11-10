@@ -1,89 +1,116 @@
 <%- include("../partials/header") %>
-<%- include("../partials/sidebar", { activePage }) %>
+<%- include("../partials/navbar", { activePage }) %>
 
-<div class="card-glass p-4 mb-3">
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-      <h3 class="mb-1">Data Resi</h3>
-      <div class="text-muted">Daftar resi yang boleh akses loker (valid/invalid).</div>
-    </div>
-
-    <div class="d-flex gap-2">
-      <a class="btn btn-accent text-white px-3" href="/resi/add">
-        <i class="bi bi-plus-circle me-2"></i>Tambah
-      </a>
-    </div>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Data Resi</h1>
+    <p class="page-subtitle">Kelola daftar nomor resi yang diizinkan membuka loker.</p>
   </div>
-
-  <form class="row g-2 mt-3" method="get" action="/resi">
-    <div class="col-md-10">
-      <input class="form-control" name="q" value="<%= q %>" placeholder="Cari nomor resi / nama paket...">
-    </div>
-    <div class="col-md-2 d-grid">
-      <button class="btn btn-outline-light" type="submit">
-        <i class="bi bi-search me-2"></i>Cari
-      </button>
-    </div>
-  </form>
+  <a class="btn-console btn-console-primary" href="/resi/add">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+    <span>Tambah Resi</span>
+  </a>
 </div>
 
-<div class="card-glass p-3">
-  <div class="table-responsive">
-    <table class="table table-dark table-hover align-middle mb-0">
-      <thead>
-        <tr>
-          <th>Nomor Resi</th>
-          <th>Nama Paket</th>
-          <th>Status</th>
-          <th>Dibuat</th>
-          <th width="270">Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (items.length > 0) { %>
+<section class="console-panel mb-3" aria-label="Pencarian data resi">
+  <form class="row g-2 align-items-end" method="get" action="/resi">
+    <div class="col-12 col-md-8 col-lg-9">
+      <label class="console-label" for="searchResi">Cari Nomor Resi atau Nama Paket</label>
+      <input class="console-input"
+             id="searchResi"
+             name="q"
+             value="<%= q %>"
+             placeholder="Contoh: JX7733615817 atau Buku">
+    </div>
+    <div class="col-12 col-md-4 col-lg-3 d-flex gap-2">
+      <button class="btn-console btn-console-secondary flex-grow-1" type="submit">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <span>Cari</span>
+      </button>
+      <% if (q) { %>
+        <a class="btn-console btn-console-secondary" href="/resi">Reset</a>
+      <% } %>
+    </div>
+  </form>
+</section>
+
+<section class="console-panel" aria-label="Daftar resi">
+  <% if (items.length > 0) { %>
+    <div class="table-responsive">
+      <table class="console-table">
+        <thead>
+          <tr>
+            <th scope="col">Nomor Resi</th>
+            <th scope="col">Nama Paket</th>
+            <th scope="col">Status</th>
+            <th scope="col">Dibuat (WIB)</th>
+            <th scope="col">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
           <% items.forEach((r) => { %>
             <tr>
-              <td class="fw-semibold"><%= r.nomor_resi %></td>
-              <td class="text-muted"><%= r.nama_paket || "-" %></td>
+              <td class="resi-code"><%= r.nomor_resi %></td>
+              <td class="muted-text"><%= r.nama_paket || "-" %></td>
               <td>
                 <% if (r.status === "valid") { %>
-                  <span class="badge text-bg-success">VALID</span>
+                  <span class="status-chip status-chip-ok">
+                    <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    <span>Valid</span>
+                  </span>
                 <% } else { %>
-                  <span class="badge text-bg-secondary">INVALID</span>
+                  <span class="status-chip status-chip-neutral">
+                    <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    <span>Invalid</span>
+                  </span>
                 <% } %>
               </td>
-              <td class="text-muted"><%= r.created_at %></td>
+              <td class="mono muted-text"><%= r.created_at %></td>
               <td>
                 <div class="d-flex gap-2 flex-wrap">
-                  <a class="btn btn-sm btn-outline-light" href="/resi/<%= r.id %>">
-                    <i class="bi bi-eye me-1"></i>Detail
+                  <a class="btn-console btn-console-secondary btn-console-sm" href="/resi/<%= r.id %>">
+                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                    <span>Detail</span>
                   </a>
 
                   <form method="post" action="/resi/<%= r.id %>/toggle" class="m-0">
-                    <button type="submit" class="btn btn-sm btn-outline-warning">
-                      <i class="bi bi-arrow-repeat me-1"></i>Toggle
+                    <button type="submit" class="btn-console btn-console-secondary btn-console-sm">
+                      <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                      <span>Ubah ke <%= r.status === 'valid' ? 'Invalid' : 'Valid' %></span>
                     </button>
                   </form>
 
-                  <form method="post" action="/resi/<%= r.id %>/delete" class="m-0"
-                        onsubmit="return confirm('Yakin ingin menghapus resi ini?')">
-                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus resi">
-                      <i class="bi bi-trash"></i>
+                  <form method="post"
+                        action="/resi/<%= r.id %>/delete"
+                        class="m-0"
+                        onsubmit="return confirm('Yakin ingin menghapus resi <%= r.nomor_resi %>?')">
+                    <button type="submit"
+                            class="btn-console btn-console-danger btn-console-sm"
+                            aria-label="Hapus resi <%= r.nomor_resi %>">
+                      <i class="bi bi-trash" aria-hidden="true"></i>
+                      <span>Hapus</span>
                     </button>
                   </form>
                 </div>
               </td>
             </tr>
           <% }) %>
-        <% } else { %>
-          <tr>
-            <td colspan="5" class="text-muted">Belum ada data resi.</td>
-          </tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
-</div>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <% if (q) { %>
+        <div class="empty-state-title">Resi tidak ditemukan</div>
+        <p class="mb-3 small">Tidak ada data yang cocok dengan kata kunci "<%= q %>".</p>
+        <a class="btn-console btn-console-secondary btn-console-sm" href="/resi">Tampilkan Semua Resi</a>
+      <% } else { %>
+        <div class="empty-state-title">Belum ada data resi</div>
+        <p class="mb-3 small">Tambahkan nomor resi paket agar kamera loker dapat memvalidasi akses.</p>
+        <a class="btn-console btn-console-primary btn-console-sm" href="/resi/add">Tambah Resi Pertama</a>
+      <% } %>
+    </div>
+  <% } %>
+</section>
 
 <%- include("../partials/footer") %>
-

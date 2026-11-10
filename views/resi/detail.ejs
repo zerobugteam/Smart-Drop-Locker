@@ -1,58 +1,78 @@
 <%- include("../partials/header") %>
-<%- include("../partials/sidebar", { activePage }) %>
+<%- include("../partials/navbar", { activePage }) %>
 
-<div class="card-glass p-4 mb-3">
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-      <h3 class="mb-1">Detail &amp; Edit Resi</h3>
-      <div class="text-muted">Informasi detail data resi paket.</div>
-    </div>
-
-    <a class="btn btn-outline-light" href="/resi">
-      <i class="bi bi-arrow-left me-2"></i>Kembali
-    </a>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Detail &amp; Edit Resi</h1>
+    <p class="page-subtitle">Perbarui informasi nomor resi, nama paket, atau status akses.</p>
   </div>
+  <a class="btn-console btn-console-secondary" href="/resi">
+    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+    <span>Kembali ke Data Resi</span>
+  </a>
 </div>
 
 <% if (msg) { %>
-  <div class="alert alert-success"><%= msg %></div>
+  <div class="console-alert console-alert-ok" role="status">
+    <div><i class="bi bi-check-circle me-2" aria-hidden="true"></i><%= msg %></div>
+  </div>
 <% } %>
 <% if (err) { %>
-  <div class="alert alert-danger"><%= err %></div>
+  <div class="console-alert console-alert-danger" role="alert">
+    <div><i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i><%= err %></div>
+  </div>
 <% } %>
 
 <% if (data) { %>
-  <div class="card-glass p-4">
+  <section class="console-panel">
     <form method="post" action="/resi/<%= data.id %>/edit" class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label">Nomor Resi</label>
-        <input class="form-control" name="nomor_resi" value="<%= data.nomor_resi %>" required>
+      <div class="col-12 col-md-6">
+        <label class="console-label" for="editNomorResi">Nomor Resi</label>
+        <input class="console-input mono"
+               id="editNomorResi"
+               name="nomor_resi"
+               value="<%= data.nomor_resi %>"
+               required>
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Status</label>
-        <select class="form-select" name="status">
-          <option value="valid" <%= data.status === "valid" ? "selected" : "" %>>valid</option>
-          <option value="invalid" <%= data.status === "invalid" ? "selected" : "" %>>invalid</option>
+      <div class="col-12 col-md-6">
+        <label class="console-label" for="editStatusResi">Status Akses</label>
+        <select class="console-select" id="editStatusResi" name="status">
+          <option value="valid" <%= data.status === "valid" ? "selected" : "" %>>Valid (izinkan buka loker)</option>
+          <option value="invalid" <%= data.status === "invalid" ? "selected" : "" %>>Invalid (tolak akses)</option>
         </select>
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Nama Paket</label>
-        <input class="form-control" name="nama_paket" value="<%= data.nama_paket || '' %>">
+      <div class="col-12 col-md-6">
+        <label class="console-label" for="editNamaPaket">Nama Paket</label>
+        <input class="console-input"
+               id="editNamaPaket"
+               name="nama_paket"
+               value="<%= data.nama_paket || '' %>"
+               placeholder="Kosongkan jika tidak ada">
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Dibuat</label>
-        <input class="form-control" value="<%= data.created_at %>" disabled>
+      <div class="col-12 col-md-6">
+        <label class="console-label" for="resiCreatedAt">Waktu Dibuat (WIB)</label>
+        <input class="console-input mono"
+               id="resiCreatedAt"
+               value="<%= data.created_at %>"
+               disabled>
       </div>
-      <div class="col-12 d-flex gap-2">
-        <button type="submit" class="btn btn-accent text-white px-4">
-          <i class="bi bi-save me-2"></i>Simpan Perubahan
+      <div class="col-12 d-flex flex-wrap gap-2">
+        <button type="submit" class="btn-console btn-console-primary" data-loading-text="Menyimpan perubahan...">
+          <i class="bi bi-save" aria-hidden="true"></i>
+          <span>Simpan Perubahan</span>
         </button>
+        <a class="btn-console btn-console-secondary" href="/resi">Batal</a>
       </div>
     </form>
-  </div>
+  </section>
 <% } else { %>
-  <div class="alert alert-danger">Data resi tidak ditemukan.</div>
+  <section class="console-panel">
+    <div class="empty-state">
+      <div class="empty-state-title">Data resi tidak ditemukan</div>
+      <p class="mb-3 small">Resi mungkin sudah dihapus atau ID tidak tersedia.</p>
+      <a class="btn-console btn-console-secondary btn-console-sm" href="/resi">Kembali ke Data Resi</a>
+    </div>
+  </section>
 <% } %>
 
 <%- include("../partials/footer") %>
-

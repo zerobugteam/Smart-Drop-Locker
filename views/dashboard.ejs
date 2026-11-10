@@ -1,187 +1,246 @@
 <%- include("partials/header") %>
-<%- include("partials/sidebar", { activePage }) %>
+<%- include("partials/navbar", { activePage }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Kontrol Loker &amp; Aktivitas</h1>
+    <p class="page-subtitle">Pantau status pintu loker, data resi valid, dan hasil pembacaan ESP32-CAM.</p>
+  </div>
+  <a class="btn-console btn-console-primary" href="/resi/add">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+    <span>Tambah Resi</span>
+  </a>
+</div>
 
 <% if (manualMsg) { %>
-  <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-    <i class="bi bi-unlock-fill me-2"></i><%= manualMsg %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <div class="console-alert console-alert-ok" role="status">
+    <div>
+      <i class="bi bi-unlock-fill me-2" aria-hidden="true"></i><%= manualMsg %>
+    </div>
+    <button type="button"
+            class="btn-close btn-close-themed"
+            aria-label="Tutup pemberitahuan"
+            onclick="this.parentElement.remove()"></button>
   </div>
 <% } %>
 
-<div class="row g-3">
-  <div class="col-12">
-    <div class="card-glass p-4">
-      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div>
-          <h3 class="mb-1">Dashboard</h3>
-          <div class="text-muted">Ringkasan sistem monitoring paket &amp; autentikasi resi.</div>
-        </div>
+<div class="dashboard-top-grid">
+  <section class="console-panel console-panel-focal" aria-labelledby="door-control-heading">
+    <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+      <div>
+        <h2 class="panel-heading" id="door-control-heading">Status Pintu Loker</h2>
+        <p class="muted-text mb-0 small mt-1">
+          Mode server: <strong><%= isVercel ? "Vercel Serverless" : "Local Node.js" %></strong>
+        </p>
+      </div>
+      <% if (doorStatus === "BUKA") { %>
+        <span class="status-chip status-chip-ok">
+          <i class="bi bi-unlock" aria-hidden="true"></i>
+          <span>Perintah BUKA aktif</span>
+        </span>
+      <% } else { %>
+        <span class="status-chip status-chip-neutral">
+          <i class="bi bi-lock" aria-hidden="true"></i>
+          <span>Standby</span>
+        </span>
+      <% } %>
+    </div>
 
-        <div class="d-flex gap-2">
-          <a class="btn btn-accent px-3 py-2 text-white" href="/resi/add">
-            <i class="bi bi-plus-circle me-2"></i>Tambah Resi
-          </a>
-
-          <form action="/manual-open" method="post" class="m-0"
-                onsubmit="return confirm('Yakin ingin membuka pintu secara manual?')">
-            <button type="submit" class="btn btn-danger px-3 py-2">
-              <i class="bi bi-unlock me-1"></i> Buka Pintu
-            </button>
-          </form>
+    <div class="door-state-row">
+      <div>
+        <div class="door-state-label">Status Solenoid Saat Ini</div>
+        <div class="door-state-value <%= doorStatus === 'BUKA' ? 'is-open' : 'is-closed' %>">
+          <i class="bi <%= doorStatus === 'BUKA' ? 'bi-unlock-fill' : 'bi-lock-fill' %>" aria-hidden="true"></i>
+          <span><%= doorStatus === "BUKA" ? "TERBUKA" : "TERKUNCI" %></span>
         </div>
+      </div>
+      <div class="muted-text small">
+        <%= doorStatus === "BUKA" ? "Menunggu reset dari ESP32-CAM" : "Menunggu resi valid atau perintah manual" %>
       </div>
     </div>
-  </div>
 
-  <div class="col-md-4">
-    <div class="card-glass p-3">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-muted">Total Resi Terdaftar</div>
-          <div class="fs-3 fw-bold"><%= stats.total_resi %></div>
-        </div>
-        <div class="badge badge-soft p-2">
-          <i class="bi bi-upc-scan fs-4"></i>
-        </div>
-      </div>
-      <div class="mt-2 small text-muted">
-        Valid: <%= stats.resi_valid %> &bull; Invalid: <%= stats.resi_invalid %>
-      </div>
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button"
+              class="btn-console btn-console-danger"
+              data-bs-toggle="modal"
+              data-bs-target="#manualOpenModal">
+        <i class="bi bi-unlock" aria-hidden="true"></i>
+        <span>Buka Pintu Manual</span>
+      </button>
+
+      <a class="btn-console btn-console-secondary" href="/scan">
+        <i class="bi bi-upc-scan" aria-hidden="true"></i>
+        <span>Scan Uji Barcode</span>
+      </a>
     </div>
+  </section>
+
+  <div class="telemetry-stack" aria-label="Ringkasan data loker">
+    <section class="telemetry-row">
+      <div>
+        <div class="telemetry-label">Total Resi Terdaftar</div>
+        <div class="telemetry-number"><%= stats.total_resi %></div>
+        <div class="telemetry-meta">
+          <%= stats.resi_valid %> valid, <%= stats.resi_invalid %> invalid
+        </div>
+      </div>
+      <a class="btn-console btn-console-secondary btn-console-sm" href="/resi">
+        Kelola Resi
+      </a>
+    </section>
+
+    <section class="telemetry-row">
+      <div>
+        <div class="telemetry-label">Total Scan Hari Ini</div>
+        <div class="telemetry-number"><%= stats.log_today %></div>
+        <div class="telemetry-meta">
+          <%= stats.log_ok %> berhasil, <%= stats.log_fail %> gagal
+        </div>
+      </div>
+      <a class="btn-console btn-console-secondary btn-console-sm" href="/log">
+        Semua Log
+      </a>
+    </section>
+  </div>
+</div>
+
+<section class="console-panel" aria-labelledby="latest-log-heading">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h2 class="panel-heading" id="latest-log-heading">Log Akses Terbaru</h2>
+    <a class="inline-link small" href="/log">Lihat seluruh riwayat</a>
   </div>
 
-  <div class="col-md-4">
-    <div class="card-glass p-3">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-muted">Total Scan Hari Ini</div>
-          <div class="fs-3 fw-bold"><%= stats.log_today %></div>
-        </div>
-        <div class="badge badge-soft p-2">
-          <i class="bi bi-clock-history fs-4"></i>
-        </div>
-      </div>
-      <div class="mt-2 small text-muted">
-        Berhasil: <%= stats.log_ok %> &bull; Gagal: <%= stats.log_fail %>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card-glass p-3">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-muted">Status Server &amp; Pintu</div>
-          <div class="fs-4 fw-bold">
-            <i class="bi bi-check-circle-fill me-2" style="color:#22c55e"></i>Online
-          </div>
-        </div>
-        <div class="badge badge-soft p-2">
-          <i class="bi bi-hdd-network fs-4"></i>
-        </div>
-      </div>
-      <div class="mt-2 small text-muted">
-        Mode: <%= isVercel ? "Vercel Serverless" : "Local Node.js" %> &bull; Pintu: <%= doorStatus %>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12">
-    <div class="card-glass p-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="fw-semibold">Log Terbaru</div>
-        <a class="text-decoration-none" href="/log">
-          Lihat semua <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-
-      <div class="table-responsive">
-        <table class="table table-dark table-hover align-middle mb-0">
-          <thead>
+  <% if (latest.length > 0) { %>
+    <div class="table-responsive">
+      <table class="console-table">
+        <thead>
+          <tr>
+            <th scope="col">Waktu (WIB)</th>
+            <th scope="col">Nomor Resi</th>
+            <th scope="col">Status</th>
+            <th scope="col">Keterangan</th>
+            <th scope="col">Foto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% latest.forEach((x) => { %>
             <tr>
-              <th>Waktu</th>
-              <th>Nomor Resi</th>
-              <th>Status</th>
-              <th>Pesan</th>
-              <th>Foto</th>
+              <td class="mono muted-text"><%= x.created_at %></td>
+              <td class="resi-code"><%= x.nomor_resi || "-" %></td>
+              <td>
+                <% if (x.status === "berhasil") { %>
+                  <span class="status-chip status-chip-ok">
+                    <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    <span>Berhasil</span>
+                  </span>
+                <% } else { %>
+                  <span class="status-chip status-chip-danger">
+                    <i class="bi bi-x-circle" aria-hidden="true"></i>
+                    <span>Gagal</span>
+                  </span>
+                <% } %>
+              </td>
+              <td class="muted-text"><%= x.pesan || "-" %></td>
+              <td>
+                <% if (x.foto_path) { %>
+                  <button type="button"
+                          class="thumb-btn"
+                          data-foto-modal="1"
+                          data-src="<%= x.foto_path %>"
+                          data-caption="<%= (x.nomor_resi || '-') + ' (' + x.created_at + ')' %>"
+                          aria-label="Lihat bukti foto resi <%= x.nomor_resi || x.created_at %>">
+                    <img class="thumb-img"
+                         src="<%= x.foto_path %>"
+                         width="52"
+                         height="52"
+                         alt="Bukti foto resi <%= x.nomor_resi || 'tidak terbaca' %>">
+                  </button>
+                <% } else { %>
+                  <span class="muted-text">-</span>
+                <% } %>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            <% if (latest.length > 0) { %>
-              <% latest.forEach((x) => { %>
-                <tr>
-                  <td class="text-muted"><%= x.created_at %></td>
-                  <td class="fw-semibold"><%= x.nomor_resi || "-" %></td>
-                  <td>
-                    <% if (x.status === "berhasil") { %>
-                      <span class="badge text-bg-success">Berhasil</span>
-                    <% } else { %>
-                      <span class="badge text-bg-danger">Gagal</span>
-                    <% } %>
-                  </td>
-                  <td class="text-muted"><%= x.pesan || "-" %></td>
-                  <td>
-                    <% if (x.foto_path) { %>
-                      <a href="#"
-                         data-foto-modal="1"
-                         data-src="<%= x.foto_path %>"
-                         data-caption="<%= (x.nomor_resi || '-') + ' • ' + x.created_at %>">
-                        <img
-                          src="<%= x.foto_path %>"
-                          alt="foto"
-                          style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.2);cursor:pointer;">
-                      </a>
-                    <% } else { %>
-                      <span class="text-muted">-</span>
-                    <% } %>
-                  </td>
-                </tr>
-              <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="5" class="text-muted">Belum ada log.</td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <div class="empty-state-title">Belum ada aktivitas scan</div>
+      <p class="mb-3 small">Log akan tercatat otomatis saat ESP32-CAM mengirim foto atau saat kamu menguji barcode lewat Scan Manual.</p>
+      <a class="btn-console btn-console-secondary btn-console-sm" href="/scan">Uji Scan Foto Barcode</a>
+    </div>
+  <% } %>
+</section>
+
+<!-- Modal Konfirmasi Buka Pintu Manual -->
+<div class="modal fade" id="manualOpenModal" tabindex="-1" aria-labelledby="manualOpenModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content console-modal">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="manualOpenModalTitle">Konfirmasi Buka Pintu Manual</h2>
+        <button type="button" class="btn-close btn-close-themed" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">
+          Perintah <strong>BUKA</strong> akan dikirim ke database kontrol pintu. ESP32-CAM akan membuka solenoid selama sekitar 5 detik pada polling berikutnya.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-console btn-console-secondary btn-console-sm" data-bs-dismiss="modal">Batal</button>
+        <form action="/manual-open" method="post" class="m-0">
+          <button type="submit" class="btn-console btn-console-danger btn-console-sm" data-loading-text="Mengirim perintah...">
+            <i class="bi bi-unlock" aria-hidden="true"></i>
+            <span>Ya, Buka Pintu</span>
+          </button>
+        </form>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="fotoModal" tabindex="-1" aria-hidden="true">
+<!-- Modal Pratinjau Foto -->
+<div class="modal fade" id="fotoModal" tabindex="-1" aria-labelledby="fotoModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title">Bukti Foto</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="modal-content console-modal">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="fotoModalTitle">Bukti Foto Scan</h2>
+        <button type="button" class="btn-close btn-close-themed" data-bs-dismiss="modal" aria-label="Tutup"></button>
       </div>
       <div class="modal-body text-center">
-        <img id="fotoModalImg" src="" alt="foto" style="max-width:100%;height:auto;border-radius:12px;">
-        <div class="mt-2 text-muted small" id="fotoModalCaption"></div>
+        <img id="fotoModalImg" src="" width="640" height="480" alt="Pratinjau bukti foto scan" style="max-width:100%;height:auto;border-radius:4px;">
+        <div class="mt-2 muted-text small mono" id="fotoModalCaption"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-document.addEventListener("click", function (e) {
-  const a = e.target.closest("[data-foto-modal='1']");
-  if (!a) return;
-  e.preventDefault();
+  (function () {
+    var fotoModalEl = document.getElementById("fotoModal");
+    var lastTrigger = null;
 
-  document.getElementById("fotoModalImg").src = a.getAttribute("data-src");
-  document.getElementById("fotoModalCaption").textContent = a.getAttribute("data-caption") || "";
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-foto-modal='1']");
+      if (!btn || !fotoModalEl) return;
+      lastTrigger = btn;
+      document.getElementById("fotoModalImg").src = btn.getAttribute("data-src") || "";
+      document.getElementById("fotoModalCaption").textContent = btn.getAttribute("data-caption") || "";
+      var modal = bootstrap.Modal.getOrCreateInstance(fotoModalEl);
+      modal.show();
+    });
 
-  const modal = new bootstrap.Modal(document.getElementById("fotoModal"));
-  modal.show();
-});
-
-document.getElementById("fotoModal").addEventListener("hidden.bs.modal", function () {
-  document.getElementById("fotoModalImg").src = "";
-  document.getElementById("fotoModalCaption").textContent = "";
-});
+    if (fotoModalEl) {
+      fotoModalEl.addEventListener("hidden.bs.modal", function () {
+        document.getElementById("fotoModalImg").src = "";
+        document.getElementById("fotoModalCaption").textContent = "";
+        if (lastTrigger) {
+          lastTrigger.focus();
+          lastTrigger = null;
+        }
+      });
+    }
+  })();
 </script>
 
 <%- include("partials/footer") %>
-

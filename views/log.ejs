@@ -1,94 +1,173 @@
 <%- include("partials/header") %>
-<%- include("partials/sidebar", { activePage }) %>
+<%- include("partials/navbar", { activePage }) %>
 
-<div class="card-glass p-4 mb-3">
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-      <h3 class="mb-1">Log Akses</h3>
-      <div class="text-muted">Riwayat autentikasi barcode (berhasil/gagal) + bukti foto.</div>
-    </div>
-    <a class="btn btn-outline-light" href="/scan">
-      <i class="bi bi-upc-scan me-2"></i>Scan Manual
-    </a>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Log Akses</h1>
+    <p class="page-subtitle">Riwayat pembacaan barcode (berhasil dan gagal) beserta foto bukti.</p>
   </div>
-
-  <form class="row g-2 mt-3" method="get" action="/log">
-    <div class="col-md-5">
-      <input class="form-control" name="q" value="<%= q %>" placeholder="Cari nomor resi...">
-    </div>
-    <div class="col-md-5">
-      <select class="form-select" name="status">
-        <option value="">Semua status</option>
-        <option value="berhasil" <%= status === "berhasil" ? "selected" : "" %>>berhasil</option>
-        <option value="gagal" <%= status === "gagal" ? "selected" : "" %>>gagal</option>
-      </select>
-    </div>
-    <div class="col-md-2 d-grid">
-      <button type="submit" class="btn btn-outline-light">
-        <i class="bi bi-funnel me-1"></i>Filter
-      </button>
-    </div>
-  </form>
+  <a class="btn-console btn-console-primary" href="/scan">
+    <i class="bi bi-upc-scan" aria-hidden="true"></i>
+    <span>Scan Manual</span>
+  </a>
 </div>
 
-<div class="card-glass p-3">
-  <div class="table-responsive">
-    <table class="table table-dark table-hover align-middle mb-0">
-      <thead>
-        <tr>
-          <th>Waktu</th>
-          <th>Nomor Resi</th>
-          <th>Status</th>
-          <th>Pesan</th>
-          <th>Foto</th>
-          <th class="text-center">Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (logs.length > 0) { %>
+<section class="console-panel mb-3" aria-label="Filter log akses">
+  <form class="row g-2 align-items-end" method="get" action="/log">
+    <div class="col-12 col-md-5">
+      <label class="console-label" for="filterLogQuery">Cari Nomor Resi</label>
+      <input class="console-input"
+             id="filterLogQuery"
+             name="q"
+             value="<%= q %>"
+             placeholder="Contoh: JX7733615817">
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="console-label" for="filterLogStatus">Status Scan</label>
+      <select class="console-select" id="filterLogStatus" name="status">
+        <option value="">Semua status</option>
+        <option value="berhasil" <%= status === "berhasil" ? "selected" : "" %>>Berhasil</option>
+        <option value="gagal" <%= status === "gagal" ? "selected" : "" %>>Gagal</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-3 d-flex gap-2">
+      <button type="submit" class="btn-console btn-console-secondary flex-grow-1">
+        <i class="bi bi-funnel" aria-hidden="true"></i>
+        <span>Terapkan Filter</span>
+      </button>
+      <% if (q || status) { %>
+        <a class="btn-console btn-console-secondary" href="/log">Reset</a>
+      <% } %>
+    </div>
+  </form>
+</section>
+
+<section class="console-panel" aria-label="Tabel riwayat log akses">
+  <% if (logs.length > 0) { %>
+    <div class="table-responsive">
+      <table class="console-table">
+        <thead>
+          <tr>
+            <th scope="col">Waktu (WIB)</th>
+            <th scope="col">Nomor Resi</th>
+            <th scope="col">Status</th>
+            <th scope="col">Keterangan</th>
+            <th scope="col">Foto</th>
+            <th scope="col">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
           <% logs.forEach((l) => { %>
             <tr>
-              <td class="text-muted"><%= l.created_at %></td>
-              <td class="fw-semibold"><%= l.nomor_resi || "-" %></td>
+              <td class="mono muted-text"><%= l.created_at %></td>
+              <td class="resi-code"><%= l.nomor_resi || "-" %></td>
               <td>
                 <% if (l.status === "berhasil") { %>
-                  <span class="badge text-bg-success">Berhasil</span>
+                  <span class="status-chip status-chip-ok">
+                    <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    <span>Berhasil</span>
+                  </span>
                 <% } else { %>
-                  <span class="badge text-bg-danger">Gagal</span>
+                  <span class="status-chip status-chip-danger">
+                    <i class="bi bi-x-circle" aria-hidden="true"></i>
+                    <span>Gagal</span>
+                  </span>
                 <% } %>
               </td>
-              <td class="text-muted"><%= l.pesan || "-" %></td>
+              <td class="muted-text"><%= l.pesan || "-" %></td>
               <td>
                 <% if (l.foto_path) { %>
-                  <a target="_blank" rel="noopener noreferrer" href="<%= l.foto_path %>">
-                    <img
-                      src="<%= l.foto_path %>"
-                      style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.2);"
-                      alt="foto">
-                  </a>
+                  <button type="button"
+                          class="thumb-btn"
+                          data-foto-modal="1"
+                          data-src="<%= l.foto_path %>"
+                          data-caption="<%= (l.nomor_resi || '-') + ' (' + l.created_at + ')' %>"
+                          aria-label="Lihat foto log <%= l.nomor_resi || l.created_at %>">
+                    <img class="thumb-img"
+                         src="<%= l.foto_path %>"
+                         width="56"
+                         height="56"
+                         alt="Bukti foto resi <%= l.nomor_resi || 'tidak terbaca' %>">
+                  </button>
                 <% } else { %>
-                  <span class="text-muted">-</span>
+                  <span class="muted-text">-</span>
                 <% } %>
               </td>
-              <td class="text-center">
-                <form method="post" action="/log/<%= l.id %>/delete" class="m-0"
-                      onsubmit="return confirm('Yakin mau hapus log ini?');">
-                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus log">
-                    <i class="bi bi-trash"></i>
+              <td>
+                <form method="post"
+                      action="/log/<%= l.id %>/delete"
+                      class="m-0"
+                      onsubmit="return confirm('Yakin ingin menghapus log ini beserta fotonya?');">
+                  <button type="submit"
+                          class="btn-console btn-console-danger btn-console-sm"
+                          aria-label="Hapus log <%= l.nomor_resi || l.id %>">
+                    <i class="bi bi-trash" aria-hidden="true"></i>
+                    <span>Hapus</span>
                   </button>
                 </form>
               </td>
             </tr>
           <% }) %>
-        <% } else { %>
-          <tr>
-            <td colspan="6" class="text-muted text-center">Belum ada log.</td>
-          </tr>
-        <% } %>
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <% if (q || status) { %>
+        <div class="empty-state-title">Log tidak ditemukan</div>
+        <p class="mb-3 small">Tidak ada riwayat yang sesuai dengan filter saat ini.</p>
+        <a class="btn-console btn-console-secondary btn-console-sm" href="/log">Reset Filter</a>
+      <% } else { %>
+        <div class="empty-state-title">Belum ada log akses</div>
+        <p class="mb-3 small">Belum ada unggahan foto dari ESP32-CAM maupun pengujian manual.</p>
+        <a class="btn-console btn-console-primary btn-console-sm" href="/scan">Uji Scan Foto Barcode</a>
+      <% } %>
+    </div>
+  <% } %>
+</section>
+
+<!-- Modal Pratinjau Foto -->
+<div class="modal fade" id="fotoModal" tabindex="-1" aria-labelledby="fotoModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content console-modal">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="fotoModalTitle">Bukti Foto Scan</h2>
+        <button type="button" class="btn-close btn-close-themed" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="fotoModalImg" src="" width="640" height="480" alt="Pratinjau bukti foto log" style="max-width:100%;height:auto;border-radius:4px;">
+        <div class="mt-2 muted-text small mono" id="fotoModalCaption"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<%- include("partials/footer") %>
+<script>
+  (function () {
+    var fotoModalEl = document.getElementById("fotoModal");
+    var lastTrigger = null;
 
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-foto-modal='1']");
+      if (!btn || !fotoModalEl) return;
+      lastTrigger = btn;
+      document.getElementById("fotoModalImg").src = btn.getAttribute("data-src") || "";
+      document.getElementById("fotoModalCaption").textContent = btn.getAttribute("data-caption") || "";
+      var modal = bootstrap.Modal.getOrCreateInstance(fotoModalEl);
+      modal.show();
+    });
+
+    if (fotoModalEl) {
+      fotoModalEl.addEventListener("hidden.bs.modal", function () {
+        document.getElementById("fotoModalImg").src = "";
+        document.getElementById("fotoModalCaption").textContent = "";
+        if (lastTrigger) {
+          lastTrigger.focus();
+          lastTrigger = null;
+        }
+      });
+    }
+  })();
+</script>
+
+<%- include("partials/footer") %>

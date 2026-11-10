@@ -1,0 +1,95 @@
+<header class="console-header">
+  <div class="container-xl header-inner">
+    <a class="brand-link" href="/">
+      <span class="brand-mark" aria-hidden="true">
+        <i class="bi bi-box-seam"></i>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">Smart Drop Locker</span>
+        <span class="brand-sub">Panel Kontrol Loker &amp; Resi</span>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Navigasi utama">
+      <a class="nav-item-link <%= activePage === 'dashboard' ? 'active' : '' %>"
+         href="/"
+         <%- activePage === 'dashboard' ? 'aria-current="page"' : '' %>>
+        Dashboard
+      </a>
+      <a class="nav-item-link <%= activePage === 'resi' ? 'active' : '' %>"
+         href="/resi"
+         <%- activePage === 'resi' ? 'aria-current="page"' : '' %>>
+        Data Resi
+      </a>
+      <a class="nav-item-link <%= activePage === 'log' ? 'active' : '' %>"
+         href="/log"
+         <%- activePage === 'log' ? 'aria-current="page"' : '' %>>
+        Log Akses
+      </a>
+      <a class="nav-item-link <%= activePage === 'scan' ? 'active' : '' %>"
+         href="/scan"
+         <%- activePage === 'scan' ? 'aria-current="page"' : '' %>>
+        Scan Manual
+      </a>
+    </nav>
+
+    <div class="header-actions">
+      <button type="button"
+              class="btn-console btn-console-secondary btn-console-sm"
+              data-theme-toggle
+              aria-pressed="false"
+              aria-label="Ganti ke mode terang">
+        <i class="bi bi-sun" aria-hidden="true" data-theme-icon></i>
+        <span data-theme-label>Mode Terang</span>
+      </button>
+
+      <a class="btn-console btn-console-primary btn-console-sm header-quick-add" href="/resi/add">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        <span>Tambah Resi</span>
+      </a>
+
+      <button type="button"
+              class="btn-console btn-console-secondary btn-console-sm menu-toggle-btn"
+              id="mobileMenuToggle"
+              aria-expanded="false"
+              aria-controls="mobileNavDrawer">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span>Menu</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-drawer" id="mobileNavDrawer" hidden>
+    <div class="container-xl">
+      <nav class="mobile-drawer-links" aria-label="Navigasi mobile">
+        <a class="nav-item-link <%= activePage === 'dashboard' ? 'active' : '' %>"
+           href="/"
+           <%- activePage === 'dashboard' ? 'aria-current="page"' : '' %>>
+          Dashboard
+        </a>
+        <a class="nav-item-link <%= activePage === 'resi' ? 'active' : '' %>"
+           href="/resi"
+           <%- activePage === 'resi' ? 'aria-current="page"' : '' %>>
+          Data Resi
+        </a>
+        <a class="nav-item-link <%= activePage === 'log' ? 'active' : '' %>"
+           href="/log"
+           <%- activePage === 'log' ? 'aria-current="page"' : '' %>>
+          Log Akses
+        </a>
+        <a class="nav-item-link <%= activePage === 'scan' ? 'active' : '' %>"
+           href="/scan"
+           <%- activePage === 'scan' ? 'aria-current="page"' : '' %>>
+          Scan Manual
+        </a>
+        <a class="btn-console btn-console-primary mt-1" href="/resi/add">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          <span>Tambah Resi</span>
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main id="main-content" class="container-xl console-main" tabindex="-1">
+

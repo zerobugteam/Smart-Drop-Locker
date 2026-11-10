@@ -1,26 +1,84 @@
 <%- include("partials/header") %>
-<%- include("partials/sidebar", { activePage }) %>
+<%- include("partials/navbar", { activePage }) %>
 
-<div class="card-glass p-4">
-  <h3 class="mb-1">Scan Foto Barcode</h3>
-  <div class="text-muted mb-3">Unggah foto barcode paket untuk pengujian validasi resi ke database.</div>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Scan Foto Barcode</h1>
+    <p class="page-subtitle">Unggah foto barcode paket (CODE-128 atau QR-Code) untuk menguji validasi ke database.</p>
+  </div>
+  <a class="btn-console btn-console-secondary" href="/log">
+    <i class="bi bi-clock-history" aria-hidden="true"></i>
+    <span>Lihat Log Akses</span>
+  </a>
+</div>
 
+<section class="console-panel">
   <% if (err) { %>
-    <div class="alert alert-danger"><%= err %></div>
+    <div class="console-alert console-alert-danger" role="alert">
+      <div><i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i><%= err %></div>
+    </div>
   <% } %>
 
   <form method="post" action="/scan" enctype="multipart/form-data" class="row g-3">
     <div class="col-12">
-      <label class="form-label">Foto Barcode (JPG / PNG)</label>
-      <input class="form-control" type="file" name="foto" accept="image/jpeg,image/png" required>
+      <label class="console-label" for="fotoInput">Pilih File Foto Barcode (JPG / PNG, maks 5 MB)</label>
+      <input class="console-input"
+             id="fotoInput"
+             type="file"
+             name="foto"
+             accept="image/jpeg,image/png"
+             required>
     </div>
-    <div class="col-12 d-grid">
-      <button type="submit" class="btn btn-accent text-white py-2">
-        <i class="bi bi-upc-scan me-2"></i>Proses &amp; Validasi Barcode
+
+    <div class="col-12" id="scanPreviewWrapper" hidden>
+      <div class="scan-preview-box">
+        <div class="muted-text small mb-2">Pratinjau foto sebelum diproses:</div>
+        <img id="scanPreviewImg"
+             class="scan-preview-img"
+             src=""
+             width="480"
+             height="320"
+             alt="Pratinjau foto barcode yang dipilih">
+      </div>
+    </div>
+
+    <div class="col-12 d-flex flex-wrap gap-2">
+      <button type="submit" class="btn-console btn-console-primary" data-loading-text="Memproses barcode...">
+        <i class="bi bi-upc-scan" aria-hidden="true"></i>
+        <span>Proses &amp; Validasi Barcode</span>
       </button>
+      <a class="btn-console btn-console-secondary" href="/">Kembali ke Dashboard</a>
     </div>
   </form>
-</div>
+</section>
+
+<script>
+  (function () {
+    var input = document.getElementById("fotoInput");
+    var wrapper = document.getElementById("scanPreviewWrapper");
+    var img = document.getElementById("scanPreviewImg");
+    var currentUrl = null;
+
+    if (!input || !wrapper || !img) return;
+
+    input.addEventListener("change", function () {
+      if (currentUrl) {
+        URL.revokeObjectURL(currentUrl);
+        currentUrl = null;
+      }
+
+      var file = input.files && input.files[0];
+      if (!file) {
+        wrapper.setAttribute("hidden", "");
+        img.src = "";
+        return;
+      }
+
+      currentUrl = URL.createObjectURL(file);
+      img.src = currentUrl;
+      wrapper.removeAttribute("hidden");
+    });
+  })();
+</script>
 
 <%- include("partials/footer") %>
-

@@ -1,42 +1,63 @@
 <%- include("../partials/header") %>
-<%- include("../partials/sidebar", { activePage }) %>
+<%- include("../partials/navbar", { activePage }) %>
 
-<div class="card-glass p-4">
-  <h3 class="mb-1">Tambah Resi</h3>
-  <div class="text-muted mb-3">Masukkan resi yang dianggap valid untuk akses.</div>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Tambah Resi</h1>
+    <p class="page-subtitle">Daftarkan nomor resi paket untuk validasi pembukaan loker.</p>
+  </div>
+  <a class="btn-console btn-console-secondary" href="/resi">
+    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+    <span>Kembali ke Data Resi</span>
+  </a>
+</div>
 
+<section class="console-panel">
   <% if (err) { %>
-    <div class="alert alert-danger"><%= err %></div>
+    <div class="console-alert console-alert-danger" role="alert">
+      <div><i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i><%= err %></div>
+    </div>
   <% } %>
   <% if (ok) { %>
-    <div class="alert alert-success">
-      <%= ok %> <a href="/resi" class="alert-link">Lihat data</a>
+    <div class="console-alert console-alert-ok" role="status">
+      <div>
+        <i class="bi bi-check-circle me-2" aria-hidden="true"></i><%= ok %>
+        <a href="/resi" class="ms-2">Lihat daftar resi</a>
+      </div>
     </div>
   <% } %>
 
   <form method="post" action="/resi/add" class="row g-3">
-    <div class="col-md-6">
-      <label class="form-label">Nomor Resi</label>
-      <input class="form-control" name="nomor_resi" placeholder="contoh: JX7733615817" required>
+    <div class="col-12 col-md-6">
+      <label class="console-label" for="nomorResi">Nomor Resi</label>
+      <input class="console-input mono"
+             id="nomorResi"
+             name="nomor_resi"
+             placeholder="Contoh: JX7733615817"
+             required>
     </div>
-    <div class="col-md-6">
-      <label class="form-label">Status</label>
-      <select class="form-select" name="status">
-        <option value="valid" selected>valid</option>
-        <option value="invalid">invalid</option>
+    <div class="col-12 col-md-6">
+      <label class="console-label" for="statusResi">Status Akses</label>
+      <select class="console-select" id="statusResi" name="status">
+        <option value="valid" selected>Valid (izinkan buka loker)</option>
+        <option value="invalid">Invalid (tolak akses)</option>
       </select>
     </div>
     <div class="col-12">
-      <label class="form-label">Nama Paket (opsional)</label>
-      <input class="form-control" name="nama_paket" placeholder="contoh: Paket Shopee / Buku / dll">
+      <label class="console-label" for="namaPaket">Nama Paket (opsional)</label>
+      <input class="console-input"
+             id="namaPaket"
+             name="nama_paket"
+             placeholder="Contoh: Paket Elektronik / Buku">
     </div>
-    <div class="col-12 d-grid">
-      <button type="submit" class="btn btn-accent text-white py-2">
-        <i class="bi bi-check2-circle me-2"></i>Simpan
+    <div class="col-12 d-flex flex-wrap gap-2">
+      <button type="submit" class="btn-console btn-console-primary" data-loading-text="Menyimpan resi...">
+        <i class="bi bi-check2-circle" aria-hidden="true"></i>
+        <span>Simpan Resi</span>
       </button>
+      <a class="btn-console btn-console-secondary" href="/resi">Batal</a>
     </div>
   </form>
-</div>
+</section>
 
 <%- include("../partials/footer") %>
-
