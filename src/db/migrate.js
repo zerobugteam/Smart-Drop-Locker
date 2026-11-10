@@ -46,3 +46,4 @@ runMigration().catch((err) => {
   console.error("Migrasi gagal:", err.message);
   process.exit(1);
 });
+
