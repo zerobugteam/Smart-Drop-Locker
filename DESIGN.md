@@ -1,7 +1,7 @@
 # DESIGN.md - Smart Drop Locker
 
 ## Design Read
-Reading this as: IoT parcel locker operations console for locker owners and admins monitoring ESP32-CAM barcode drops, in a **Locker Hardware Console** visual language, dial **ENERGY 1 / RHYTHM 2 / MOTION 1**.
+Reading this as: IoT parcel locker operations console for locker owners and admins monitoring ESP32-CAM barcode drops, in a **Locker Hardware Console** visual language, dial **ENERGY 1 / RHYTHM 2 / MOTION 2**.
 
 ## Identity & Purpose Decisions (R-31)
 - **Visual Direction**: Locker Hardware Console. Terinspirasi panel kontrol perangkat keras dan instrumen logistik: permukaan matte solid bertingkat dengan border 1px tegas, tanpa gradien ungu/neon, tanpa blur kaca, dan tanpa bayangan mengambang.
@@ -39,3 +39,8 @@ Reading this as: IoT parcel locker operations console for locker owners and admi
 - **Layout & Rhythm (R-05, RHYTHM 2)**:
   - Top navigation bar tunggal yang ringkas dengan menu responsif berlabel (`Menu`) di layar sempit.
   - Dashboard disusun berdasarkan keputusan pengguna (bukan 3 kartu statistik identik): panel fokus kontrol pintu berdampingan dengan ringkasan telemetri vertikal di atas, diikuti tabel log terbaru di bawahnya.
+- **Motion & Interactive Transitions (R-19, MOTION 2 - Material Design 3 Expressive Motion)**:
+  - **M3 Spatial Spring & Emphasized Easing**: Menggunakan kurva pegas (`cubic-bezier(0.34, 1.45, 0.64, 1)`) dan kurva akselerasi M3 (`cubic-bezier(0.2, 0, 0, 1)`) untuk seluruh transisi interaksi agar terasa responsif dan taktil tanpa loop berulang.
+  - **Directional Shared-Axis Soft Navigation**: Perpindahan antar halaman menghitung arah urutan tab (`maju` / `mundur`) lalu menjalankan transisi geser terarah dan cascade bertahap (`stagger`) pada panel dan baris tabel, disertai bilah progres tipis di tepi atas.
+  - **M3 State-Layer Ripple & Tactile Morph**: Tombol dan tautan navigasi memancarkan efek riak dari titik sentuh (`pointerdown`), dengan morph radius halus saat ditekan (`scale(0.97)` -> pegas kembali).
+  - **Modal & Toast Spring**: Dialog modal dan toast notifikasi masuk dengan skala elastis halus (`scale(0.92)` -> `1`), dan seluruh animasi otomatis dimatikan saat `@media (prefers-reduced-motion: reduce)` aktif.

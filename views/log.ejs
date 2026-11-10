@@ -13,7 +13,12 @@
 </div>
 
 <section class="console-panel mb-3" aria-label="Filter log akses">
-  <form class="row g-2 align-items-end" method="get" action="/log">
+  <form class="row g-2 align-items-end"
+        method="get"
+        action="/log"
+        data-soft-form
+        data-live-filter
+        data-soft-target="#logResultsRegion">
     <div class="col-12 col-md-5">
       <label class="console-label" for="filterLogQuery">Cari Nomor Resi</label>
       <input class="console-input"
@@ -24,7 +29,7 @@
     </div>
     <div class="col-12 col-md-4">
       <label class="console-label" for="filterLogStatus">Status Scan</label>
-      <select class="console-select" id="filterLogStatus" name="status">
+      <select class="console-select" id="filterLogStatus" name="status" data-live-select>
         <option value="">Semua status</option>
         <option value="berhasil" <%= status === "berhasil" ? "selected" : "" %>>Berhasil</option>
         <option value="gagal" <%= status === "gagal" ? "selected" : "" %>>Gagal</option>
@@ -42,7 +47,7 @@
   </form>
 </section>
 
-<section class="console-panel" aria-label="Tabel riwayat log akses">
+<section class="console-panel" id="logResultsRegion" aria-label="Tabel riwayat log akses">
   <% if (logs.length > 0) { %>
     <div class="table-responsive">
       <table class="console-table">
@@ -141,33 +146,5 @@
     </div>
   </div>
 </div>
-
-<script>
-  (function () {
-    var fotoModalEl = document.getElementById("fotoModal");
-    var lastTrigger = null;
-
-    document.addEventListener("click", function (e) {
-      var btn = e.target.closest("[data-foto-modal='1']");
-      if (!btn || !fotoModalEl) return;
-      lastTrigger = btn;
-      document.getElementById("fotoModalImg").src = btn.getAttribute("data-src") || "";
-      document.getElementById("fotoModalCaption").textContent = btn.getAttribute("data-caption") || "";
-      var modal = bootstrap.Modal.getOrCreateInstance(fotoModalEl);
-      modal.show();
-    });
-
-    if (fotoModalEl) {
-      fotoModalEl.addEventListener("hidden.bs.modal", function () {
-        document.getElementById("fotoModalImg").src = "";
-        document.getElementById("fotoModalCaption").textContent = "";
-        if (lastTrigger) {
-          lastTrigger.focus();
-          lastTrigger = null;
-        }
-      });
-    }
-  })();
-</script>
 
 <%- include("partials/footer") %>

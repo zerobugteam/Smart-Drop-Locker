@@ -215,32 +215,4 @@
   </div>
 </div>
 
-<script>
-  (function () {
-    var fotoModalEl = document.getElementById("fotoModal");
-    var lastTrigger = null;
-
-    document.addEventListener("click", function (e) {
-      var btn = e.target.closest("[data-foto-modal='1']");
-      if (!btn || !fotoModalEl) return;
-      lastTrigger = btn;
-      document.getElementById("fotoModalImg").src = btn.getAttribute("data-src") || "";
-      document.getElementById("fotoModalCaption").textContent = btn.getAttribute("data-caption") || "";
-      var modal = bootstrap.Modal.getOrCreateInstance(fotoModalEl);
-      modal.show();
-    });
-
-    if (fotoModalEl) {
-      fotoModalEl.addEventListener("hidden.bs.modal", function () {
-        document.getElementById("fotoModalImg").src = "";
-        document.getElementById("fotoModalCaption").textContent = "";
-        if (lastTrigger) {
-          lastTrigger.focus();
-          lastTrigger = null;
-        }
-      });
-    }
-  })();
-</script>
-
 <%- include("partials/footer") %>

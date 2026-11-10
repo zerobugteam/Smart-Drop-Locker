@@ -13,7 +13,12 @@
 </div>
 
 <section class="console-panel mb-3" aria-label="Pencarian data resi">
-  <form class="row g-2 align-items-end" method="get" action="/resi">
+  <form class="row g-2 align-items-end"
+        method="get"
+        action="/resi"
+        data-soft-form
+        data-live-filter
+        data-soft-target="#resiResultsRegion">
     <div class="col-12 col-md-8 col-lg-9">
       <label class="console-label" for="searchResi">Cari Nomor Resi atau Nama Paket</label>
       <input class="console-input"
@@ -34,7 +39,7 @@
   </form>
 </section>
 
-<section class="console-panel" aria-label="Daftar resi">
+<section class="console-panel" id="resiResultsRegion" aria-label="Daftar resi">
   <% if (items.length > 0) { %>
     <div class="table-responsive">
       <table class="console-table">
@@ -73,7 +78,7 @@
                     <span>Detail</span>
                   </a>
 
-                  <form method="post" action="/resi/<%= r.id %>/toggle" class="m-0">
+                  <form method="post" action="/resi/<%= r.id %>/toggle" class="m-0" data-soft-toggle>
                     <button type="submit" class="btn-console btn-console-secondary btn-console-sm">
                       <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
                       <span>Ubah ke <%= r.status === 'valid' ? 'Invalid' : 'Valid' %></span>
