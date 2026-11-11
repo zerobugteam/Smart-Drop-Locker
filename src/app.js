@@ -12,6 +12,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+app.use((req, res, next) => {
+  const proto = (req.headers["x-forwarded-proto"] || req.protocol || "https").split(",")[0].trim();
+  const host = (req.headers["x-forwarded-host"] || req.get("host") || "smart-drop-locker.vercel.app").split(",")[0].trim();
+  res.locals.baseUrl = `${proto}://${host}`;
+  res.locals.currentPath = req.originalUrl || "/";
+  next();
+});
+
 app.use("/api", apiRoutes);
 app.use("/", webRoutes);
 
